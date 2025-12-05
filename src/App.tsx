@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Bath, ChefHat, Info, Plus, Minus, Clock, Hammer, PaintBucket, ChevronDown, ChevronUp, Wand2, Grid, Droplets, ArrowUpFromLine } from 'lucide-react';
+import { Calculator, Bath, ChefHat, Info, Plus, Minus, Clock, Hammer, PaintBucket, ChevronDown, ChevronUp, Wand2, Grid, Droplets } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
-// TYPES defined here to satisfy the compiler
 interface InputCardProps {
   children: React.ReactNode;
   className?: string;
@@ -271,8 +270,6 @@ export default function App() {
     
     setFramingCost(isGut ? Math.round(Math.min(2000, 250 + (roomSize * 10 * heightMult))) : 0);
     setInsulationCost(isGut ? Math.round(Math.min(500, 100 + (roomSize * 2))) : 0);
-    
-    // UPDATED: Paint & Drywall scale with Ceiling Height
     setDrywallCost(Math.round(roomSize * 20 * heightMult)); 
     setPaintCost(Math.round(roomSize * 20 * heightMult));
 
@@ -289,17 +286,15 @@ export default function App() {
     // 4. Wet Area Logic
     setTubCost(roomSize > 60 ? 3000 : 750);
     setPlumbingFixtureCost(roomSize * 10);
-    setGlassCost(Math.round(roomSize * 35 * heightMult)); // Glass can get taller too
+    setGlassCost(Math.round(roomSize * 35 * heightMult));
 
     // 5. Tiling Logic
-    // Scale Shower Walls by height
     const baseShowerWalls = isLarge ? 110 : 80;
     setShowerWallSF(Math.round(baseShowerWalls * heightMult));
-    
     setShowerFloorSF(isLarge ? 20 : 12);
     setBathFloorSF(Math.round(roomSize * 0.75));
 
-  }, [roomSize, scopeLevel, activeTab, ceilingHeight]); // Added ceilingHeight dependency
+  }, [roomSize, scopeLevel, activeTab, ceilingHeight]);
 
   // --- INSTALL CALCULATION EFFECTS ---
   useEffect(() => {
@@ -328,22 +323,18 @@ export default function App() {
     totalCost += framingCost + insulationCost + drywallCost + carpentryCost + paintCost;
     totalCost += plumbingCost + electricalCost + hvacCost;
 
-    // Vanity
     const rawCounterCost = counterSF * counterCost;
     const finalCounterCost = Math.max(750, rawCounterCost); 
     totalCost += vanityCost + mirrorCost + finalCounterCost + (sinkCount * 175) + (faucetCount * 350) + (lightCount * 200);
 
-    // Wet Area & Toilet
     totalCost += tubCost + plumbingFixtureCost + glassCost + (toiletCount * 450);
 
-    // Tiling
     totalCost += (showerWallSF * showerWallCost);
     totalCost += (showerFloorSF * showerFloorCost);
     totalCost += (bathFloorSF * bathFloorCost);
     totalCost += (otherTileSF * otherTileCost);
     totalCost += tileInstallCost; 
 
-    // LVP
     totalCost += (lvpSF * lvpCost);
     totalCost += lvpInstallCost; 
 
@@ -360,8 +351,9 @@ export default function App() {
 
   const estimate = getEstimate();
 
+  // WIDENED CONTAINER HERE: max-w-3xl
   return (
-    <div className="flex flex-col h-screen bg-slate-100 max-w-md mx-auto shadow-2xl overflow-hidden font-sans">
+    <div className="flex flex-col h-screen bg-slate-100 w-full max-w-3xl mx-auto shadow-2xl overflow-hidden font-sans">
       
       {/* HEADER */}
       <header className="bg-blue-900 text-white pt-6 pb-4 px-6 shadow-lg shrink-0 z-50 relative">
@@ -370,7 +362,7 @@ export default function App() {
             <Calculator size={24} />
             QuickEst
           </h1>
-          <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200 border border-blue-700">v1.5 Ceiling TSX</span>
+          <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200 border border-blue-700">v1.6 Wide</span>
         </div>
         <div className="flex p-1 bg-blue-800 rounded-xl">
            <div className="flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 bg-white text-blue-900 shadow-sm">
@@ -521,8 +513,8 @@ export default function App() {
         </div>
       </main>
 
-      {/* STICKY FOOTER */}
-      <footer className="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-50">
+      {/* STICKY FOOTER WITH FIXED CENTERING */}
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-3xl bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-50">
         <div className="p-4">
           <div className="flex justify-between items-end mb-1">
             <span className="text-sm font-medium text-gray-500">Estimated Range</span>
