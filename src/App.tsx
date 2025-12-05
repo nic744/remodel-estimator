@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Bath, ChefHat, Info, Plus, Minus, Clock, Hammer, PaintBucket, ChevronDown, ChevronUp, Wand2, Grid, Droplets } from 'lucide-react';
+import { Calculator, Bath, ChefHat, Info, Plus, Minus, Clock, Hammer, PaintBucket, ChevronDown, ChevronUp, Wand2, Grid, Droplets, ArrowUpFromLine } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
-const InputCard = ({ children, className = "" }) => (
+// TYPES defined here to satisfy the compiler
+interface InputCardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const InputCard = ({ children, className = "" }: InputCardProps) => (
   <div className={`bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 ${className}`}>
     {children}
   </div>
 );
 
-const Accordion = ({ title, icon: Icon, children, isOpen, toggle }) => (
+interface AccordionProps {
+  title: string;
+  icon?: any;
+  children: React.ReactNode;
+  isOpen: boolean;
+  toggle: () => void;
+}
+
+const Accordion = ({ title, icon: Icon, children, isOpen, toggle }: AccordionProps) => (
   <div className="mb-4 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <button 
       onClick={toggle}
@@ -25,8 +39,17 @@ const Accordion = ({ title, icon: Icon, children, isOpen, toggle }) => (
   </div>
 );
 
+interface MoneyStepperProps {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  min: number;
+  max: number;
+  step: number;
+}
+
 // 1. MONEY STEPPER
-const MoneyStepper = ({ label, value, onChange, min, max, step }) => {
+const MoneyStepper = ({ label, value, onChange, min, max, step }: MoneyStepperProps) => {
   const handleDecrease = () => onChange(Math.max(min, (value || 0) - step));
   const handleIncrease = () => onChange(Math.min(max, (value || 0) + step));
 
@@ -44,8 +67,15 @@ const MoneyStepper = ({ label, value, onChange, min, max, step }) => {
   );
 };
 
+interface ArrayStepperProps {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  steps: number[];
+}
+
 // 2. ARRAY STEPPER
-const ArrayStepper = ({ label, value, onChange, steps }) => {
+const ArrayStepper = ({ label, value, onChange, steps }: ArrayStepperProps) => {
   const currentIndex = steps.indexOf(value) !== -1 ? steps.indexOf(value) : 0;
   const handlePrev = () => { if (currentIndex > 0) onChange(steps[currentIndex - 1]); };
   const handleNext = () => { if (currentIndex < steps.length - 1) onChange(steps[currentIndex + 1]); };
@@ -64,22 +94,40 @@ const ArrayStepper = ({ label, value, onChange, steps }) => {
   );
 };
 
+interface UnitStepperProps {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  min: number;
+  max: number;
+  unit?: string;
+}
+
 // 3. UNIT STEPPER
-const UnitStepper = ({ label, value, onChange, min, max, unit = "" }) => (
-  <div className="mb-4 last:mb-0">
-    <div className="flex justify-between items-center mb-2">
-      <span className="text-sm font-semibold text-gray-700">{label}</span>
+const UnitStepper = ({ label, value, onChange, min, max, unit = "" }: UnitStepperProps) => {
+  return (
+    <div className="mb-4 last:mb-0">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-semibold text-gray-700">{label}</span>
+      </div>
+      <div className="flex items-center justify-between bg-gray-50 rounded-lg p-1 border border-gray-100">
+        <button onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} className="p-2 bg-white rounded shadow-sm disabled:opacity-50"><Minus size={16}/></button>
+        <span className="font-bold text-gray-800">{value} {unit}</span>
+        <button onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} className="p-2 bg-blue-600 text-white rounded shadow-sm disabled:opacity-50"><Plus size={16}/></button>
+      </div>
     </div>
-    <div className="flex items-center justify-between bg-gray-50 rounded-lg p-1 border border-gray-100">
-      <button onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} className="p-2 bg-white rounded shadow-sm disabled:opacity-50"><Minus size={16}/></button>
-      <span className="font-bold text-gray-800">{value} {unit}</span>
-      <button onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} className="p-2 bg-blue-600 text-white rounded shadow-sm disabled:opacity-50"><Plus size={16}/></button>
-    </div>
-  </div>
-);
+  );
+};
+
+interface CountInputProps {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  costPerUnit: number;
+}
 
 // 4. COUNT INPUT
-const CountInput = ({ label, value, onChange, costPerUnit }) => (
+const CountInput = ({ label, value, onChange, costPerUnit }: CountInputProps) => (
   <div className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
     <div>
       <div className="text-sm font-semibold text-gray-700">{label}</div>
@@ -93,8 +141,18 @@ const CountInput = ({ label, value, onChange, costPerUnit }) => (
   </div>
 );
 
+interface AreaLevelInputProps {
+  label: string;
+  sqFt: number;
+  setSqFt: (val: number) => void;
+  levelCost: number;
+  setLevelCost: (val: number) => void;
+  levels: { label: string; cost: number }[];
+  step?: number;
+}
+
 // 5. AREA INPUT
-const AreaLevelInput = ({ label, sqFt, setSqFt, levelCost, setLevelCost, levels, step = 5 }) => (
+const AreaLevelInput = ({ label, sqFt, setSqFt, levelCost, setLevelCost, levels, step = 5 }: AreaLevelInputProps) => (
   <div className="mb-6 last:mb-0">
     <div className="flex justify-between items-center mb-2">
       <label className="text-sm font-bold text-gray-800">{label}</label>
@@ -133,14 +191,15 @@ const AreaLevelInput = ({ label, sqFt, setSqFt, levelCost, setLevelCost, levels,
 export default function App() {
   const [activeTab, setActiveTab] = useState('bathroom'); 
   const [showDetails, setShowDetails] = useState(false);
-  const [openSections, setOpenSections] = useState({ trades: false, vanity: false, wet: true, tiling: true, lvp: false });
+  const [openSections, setOpenSections] = useState({ trades: false, vanity: false, wet: true, tiling: true, lvp: false, misc: false });
 
-  const toggleSection = (section) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  const toggleSection = (section: string) => {
+    setOpenSections((prev: any) => ({ ...prev, [section]: !prev[section] }));
   };
 
   // --- SMART INPUTS ---
   const [roomSize, setRoomSize] = useState(60); 
+  const [ceilingHeight, setCeilingHeight] = useState(8); 
   const [scopeLevel, setScopeLevel] = useState('gut'); 
 
   // --- DERIVED STATE ---
@@ -154,11 +213,11 @@ export default function App() {
   const [framingCost, setFramingCost] = useState(500); 
   const [insulationCost, setInsulationCost] = useState(200);
   const [drywallCost, setDrywallCost] = useState(1500);
-  const [carpentryCost, setCarpentryCost] = useState(300); // Updated default logic
+  const [carpentryCost, setCarpentryCost] = useState(300); 
   const [paintCost, setPaintCost] = useState(750); 
-  const [plumbingCost, setPlumbingCost] = useState(2100); // Updated default logic
-  const [electricalCost, setElectricalCost] = useState(1500); // Updated default logic
-  const [hvacCost, setHvacCost] = useState(250); // Updated default logic
+  const [plumbingCost, setPlumbingCost] = useState(2100); 
+  const [electricalCost, setElectricalCost] = useState(1500); 
+  const [hvacCost, setHvacCost] = useState(250); 
 
   // 3. Vanity
   const [vanityCost, setVanityCost] = useState(2500); 
@@ -184,35 +243,40 @@ export default function App() {
   const [bathFloorCost, setBathFloorCost] = useState(7.5); 
   const [otherTileSF, setOtherTileSF] = useState(0);
   const [otherTileCost, setOtherTileCost] = useState(10); 
-  const [tileInstallCost, setTileInstallCost] = useState(0); // Calculated
+  const [tileInstallCost, setTileInstallCost] = useState(0); 
 
   // 6. LVP
   const [lvpSF, setLvpSF] = useState(0);
   const [lvpCost, setLvpCost] = useState(5); 
-  const [lvpInstallCost, setLvpInstallCost] = useState(0); // Calculated
+  const [lvpInstallCost, setLvpInstallCost] = useState(0); 
 
 
   // --- SMART LOGIC EFFECT ---
   useEffect(() => {
     if (activeTab === 'kitchen') return;
 
+    // Height Multiplier (Standard is 8ft, so 10ft = 1.25x)
+    const heightMult = ceilingHeight / 8;
+
     // 1. General & Demo
     const isGut = scopeLevel === 'gut';
-    setDemoCost(isGut ? 500 + (roomSize * 15) : 500 + (roomSize * 5)); 
+    setDemoCost(isGut ? 500 + (roomSize * 15 * heightMult) : 500 + (roomSize * 5)); 
     setJobWeeks(isGut ? Math.max(3, Math.ceil(roomSize / 15)) : Math.max(2, Math.ceil(roomSize / 25)));
 
-    // 2. Trades (Updated per prompt)
+    // 2. Trades
     setPlumbingCost(roomSize * 35);
     setElectricalCost(roomSize * 25);
-    setHvacCost(250); // Fixed
+    setHvacCost(250);
     setCarpentryCost(roomSize * 5);
     
-    setFramingCost(isGut ? Math.min(2000, 250 + (roomSize * 10)) : 0);
-    setInsulationCost(isGut ? Math.min(500, 100 + (roomSize * 2)) : 0);
-    setDrywallCost(roomSize * 20); 
-    setPaintCost(roomSize * 20);
+    setFramingCost(isGut ? Math.round(Math.min(2000, 250 + (roomSize * 10 * heightMult))) : 0);
+    setInsulationCost(isGut ? Math.round(Math.min(500, 100 + (roomSize * 2))) : 0);
+    
+    // UPDATED: Paint & Drywall scale with Ceiling Height
+    setDrywallCost(Math.round(roomSize * 20 * heightMult)); 
+    setPaintCost(Math.round(roomSize * 20 * heightMult));
 
-    // 3. Vanity Logic (Updated per prompt)
+    // 3. Vanity Logic
     const isLarge = roomSize > 65;
     setSinkCount(isLarge ? 2 : 1);
     setFaucetCount(isLarge ? 2 : 1);
@@ -225,25 +289,24 @@ export default function App() {
     // 4. Wet Area Logic
     setTubCost(roomSize > 60 ? 3000 : 750);
     setPlumbingFixtureCost(roomSize * 10);
-    setGlassCost(roomSize * 35); // Now called Shower Glass
+    setGlassCost(Math.round(roomSize * 35 * heightMult)); // Glass can get taller too
 
     // 5. Tiling Logic
-    setShowerWallSF(isLarge ? 110 : 80);
+    // Scale Shower Walls by height
+    const baseShowerWalls = isLarge ? 110 : 80;
+    setShowerWallSF(Math.round(baseShowerWalls * heightMult));
+    
     setShowerFloorSF(isLarge ? 20 : 12);
-    // Assume 75% of room is floor tile if not using LVP (default assumption)
     setBathFloorSF(Math.round(roomSize * 0.75));
 
-  }, [roomSize, scopeLevel, activeTab]);
+  }, [roomSize, scopeLevel, activeTab, ceilingHeight]); // Added ceilingHeight dependency
 
   // --- INSTALL CALCULATION EFFECTS ---
-  
-  // Update Tile Install Cost whenever any tile SF changes
   useEffect(() => {
     const totalTileSF = showerWallSF + showerFloorSF + bathFloorSF + otherTileSF;
     setTileInstallCost(totalTileSF * 15);
   }, [showerWallSF, showerFloorSF, bathFloorSF, otherTileSF]);
 
-  // Update LVP Install Cost whenever LVP SF changes
   useEffect(() => {
     setLvpInstallCost(lvpSF * 2.5);
   }, [lvpSF]);
@@ -278,11 +341,11 @@ export default function App() {
     totalCost += (showerFloorSF * showerFloorCost);
     totalCost += (bathFloorSF * bathFloorCost);
     totalCost += (otherTileSF * otherTileCost);
-    totalCost += tileInstallCost; // Calculated labor
+    totalCost += tileInstallCost; 
 
     // LVP
     totalCost += (lvpSF * lvpCost);
-    totalCost += lvpInstallCost; // Calculated labor
+    totalCost += lvpInstallCost; 
 
     return totalCost * MARKUP;
   };
@@ -307,7 +370,7 @@ export default function App() {
             <Calculator size={24} />
             QuickEst
           </h1>
-          <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200 border border-blue-700">v1.4 Streamlined</span>
+          <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200 border border-blue-700">v1.5 Ceiling TSX</span>
         </div>
         <div className="flex p-1 bg-blue-800 rounded-xl">
            <div className="flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 bg-white text-blue-900 shadow-sm">
@@ -341,10 +404,26 @@ export default function App() {
                 onChange={(e) => setRoomSize(Number(e.target.value))}
                 className="w-full h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer accent-yellow-400"
               />
-              <div className="flex justify-between text-[10px] text-blue-300 mt-1">
-                <span>Small (30)</span>
-                <span>Avg (60)</span>
-                <span>Large (150)</span>
+            </div>
+
+             {/* Ceiling Height */}
+             <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium text-blue-100">Ceiling Height</label>
+                <span className="text-2xl font-bold">{ceilingHeight} FT</span>
+              </div>
+              <input
+                type="range"
+                min={8}
+                max={12}
+                step={1}
+                value={ceilingHeight}
+                onChange={(e) => setCeilingHeight(Number(e.target.value))}
+                className="w-full h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer accent-yellow-400"
+              />
+               <div className="flex justify-between text-[10px] text-blue-300 mt-1">
+                <span>Std (8)</span>
+                <span>Tall (12)</span>
               </div>
             </div>
 
@@ -368,7 +447,7 @@ export default function App() {
           </div>
 
           <p className="text-center text-xs text-gray-400 font-medium py-2">
-            Default costs based on {roomSize} SF. Tap to edit.
+            Default costs based on {roomSize} SF & {ceilingHeight} FT Ceiling.
           </p>
 
           {/* --- COLLAPSIBLE SECTIONS --- */}
@@ -404,6 +483,9 @@ export default function App() {
              <CountInput label="Faucets" value={faucetCount} onChange={setFaucetCount} costPerUnit={350} />
              <CountInput label="Lights" value={lightCount} onChange={setLightCount} costPerUnit={200} />
              <AreaLevelInput label="Countertop" sqFt={counterSF} setSqFt={setCounterSF} levelCost={counterCost} setLevelCost={setCounterCost} levels={[{label: 'Lvl 1', cost: 60}, {label: 'Lvl 2', cost: 80}, {label: 'Lvl 3', cost: 100}]} step={1} />
+             <div className="text-xs text-blue-600 text-right -mt-4 mb-4 mr-2 italic">
+               (Min. Charge: $750)
+             </div>
           </Accordion>
 
           {/* SECTION 4: TILING */}
